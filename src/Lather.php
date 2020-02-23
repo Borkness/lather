@@ -2,8 +2,11 @@
 
 namespace Lather;
 
+use SoapVar;
+use stdClass;
 use Exception;
 use SoapClient;
+use SoapHeader;
 use JsonSerializable;
 use Lather\Macros\Filterable;
 
@@ -40,6 +43,22 @@ class Lather implements JsonSerializable
     protected $casts = [];
 
     /**
+     * Array of headers to be set in SOAP client.
+     *
+     * Example:
+     * [0 => [
+     * 'namespace' => 'ns1',
+     * 'name' => 'hello',
+     * 'data' => [
+     *      'username' => 'hi',
+     *      'password' => 'abc123']
+     * ]]
+     *
+     * @var array
+     */
+    protected $headers = [];
+
+    /**
      * Array of runtime macros.
      *
      * @var array
@@ -57,7 +76,32 @@ class Lather implements JsonSerializable
     {
         $this->client = new SoapClient($this->wsdl);
 
+        $this->setSoapHeaders();
+
         $this->addRuntimeMacros();
+    }
+
+    /**
+     * Set SOAP headers if headers array is not empty.
+     */
+    private function setSoapHeaders()
+    {
+        if (!empty($this->headers)) {
+            $headers = [];
+
+            foreach ($this->headers as $header) {
+                $namespace = $header['namespace'];
+                $name = $header['name'];
+                $varData = new stdClass();
+                foreach ($header['data'] as $key => $data) {
+                    $varData->{$key} = $data;
+                }
+                $dataValues = new SoapVar($varData, SOAP_ENC_OBJECT);
+                $headers[] = new SoapHeader($namespace, $name, $dataValues);
+            }
+
+            $this->client->__setSoapHeaders($headers);
+        }
     }
 
     /**
