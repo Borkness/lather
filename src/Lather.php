@@ -4,9 +4,10 @@ namespace Lather;
 
 use Exception;
 use SoapClient;
+use JsonSerializable;
 use Lather\Macros\Filterable;
 
-class Lather
+class Lather implements JsonSerializable
 {
     use Filterable;
 
@@ -91,7 +92,7 @@ class Lather
         return (string) get_class($this);
     }
 
-    protected function formatResponse(array $response)
+    protected function formatResponse($response)
     {
         foreach ($response as $key => $value) {
             if (array_key_exists($key, $this->casts)) {
@@ -160,7 +161,7 @@ class Lather
 
         $soapResp = $this->client->__soapCall($soapFunction, [$preppedParam]);
 
-        return $this->formatResponse((array) $soapResp);
+        return $this->formatResponse($soapResp);
     }
 
     public function __get($name)
@@ -178,6 +179,11 @@ class Lather
     }
 
     public function all()
+    {
+        return $this->formattedResponse;
+    }
+
+    public function jsonSerialize()
     {
         return $this->formattedResponse;
     }
