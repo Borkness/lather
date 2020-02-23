@@ -1,4 +1,5 @@
 <img src="img/lather.svg" width="35%">
+
 ---
 
 Lather is a simple to use but powerful SOAP client for PHP 7.2+ with the ability to utilize macros.
