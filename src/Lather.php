@@ -29,6 +29,13 @@ class Lather implements JsonSerializable
     protected $wsdl;
 
     /**
+     * Function name to be called if empty the class name will be used.
+     *
+     * @var string
+     */
+    protected $functionName;
+
+    /**
      * Array of soap params.
      *
      * @var array
@@ -201,7 +208,7 @@ class Lather implements JsonSerializable
             }
         }
 
-        $soapFunction = $this->getClassName();
+        $soapFunction = empty($this->functionName) ? $this->getClassName() : $this->functionName;
 
         $soapResp = $this->client->__soapCall($soapFunction, [$preppedParam]);
 
