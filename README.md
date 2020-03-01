@@ -4,7 +4,7 @@
 
 Lather is a simple to use but powerful SOAP client for PHP 7.2+ with the ability to utilize macros.
 
-Through the use of classes querying SOAP API's becomes a breeze.
+Through the use of Lather querying SOAP API's becomes a breeze.
 
 **Note:** Lather is still under development and therefore methods could be subject to change
 
@@ -21,7 +21,7 @@ composer install generalmoo\lather
 
 >For more detailed instructions please visit the documentation located here
 
-Firstly you must create a class named after the function method you wish to call defining the parameters that will be called along with the WSDL.
+Firstly you must create a class, by default the soap function called will be the name of the class, defining the parameters that will be called along with the WSDL.
 
 ```php
 <?php
