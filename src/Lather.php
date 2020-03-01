@@ -66,6 +66,13 @@ class Lather implements JsonSerializable
     protected $headers = [];
 
     /**
+     * Array of joins (other functions to be called).
+     *
+     * @var array
+     */
+    protected $joins = [];
+
+    /**
      * Array of runtime macros.
      *
      * @var array
@@ -152,7 +159,7 @@ class Lather implements JsonSerializable
      */
     protected function getClassName(): string
     {
-        return (string) get_class($this);
+        return (string) (new \ReflectionClass(get_class($this)))->getShortName();
     }
 
     protected function formatResponse($response)
@@ -234,7 +241,44 @@ class Lather implements JsonSerializable
 
         $soapResp = $this->client->__soapCall($soapFunction, [$preppedParam]);
 
-        return $this->formatResponse($soapResp);
+        $joins = $this->callJoins((array) $soapResp);
+        $joinParams = [];
+
+        foreach ($joins as $join) {
+            foreach ($join as $key => $value) {
+                if (is_object($value)) {
+                    $joinParams[$key] = (array) $value;
+                } else {
+                    $joinParams[$key] = $value;
+                }
+            }
+        }
+
+        return $this->formatResponse(array_merge((array) $soapResp, $joinParams));
+    }
+
+    protected function callJoins($soapResp)
+    {
+        $joinResp = [];
+
+        if (!empty($this->joins)) {
+            foreach ($this->joins as $joinKey => $value) {
+                if (class_exists($joinKey)) {
+                    $joinCondition = explode(',', $value);
+
+                    $joinClass = new $joinKey();
+                    $joinClass->{$joinCondition[1]} = $soapResp[$joinCondition[0]];
+
+                    $joinClass->call();
+
+                    $joinResp[] = $joinClass->all();
+                } else {
+                    throw new Exception("Class: {$joinKey} does not exist");
+                }
+            }
+        }
+
+        return $joinResp;
     }
 
     public function __get($name)
