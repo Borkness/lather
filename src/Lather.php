@@ -86,6 +86,8 @@ class Lather implements JsonSerializable
         $this->setSoapHeaders();
 
         $this->addRuntimeMacros();
+
+        $this->addClassParams();
     }
 
     /**
@@ -108,6 +110,16 @@ class Lather implements JsonSerializable
             }
 
             $this->client->__setSoapHeaders($headers);
+        }
+    }
+
+    /**
+     * Add the SOAP params on construct.
+     */
+    public function addClassParams()
+    {
+        foreach ($this->params as $key => $value) {
+            $this->{$key} = '';
         }
     }
 
@@ -198,12 +210,22 @@ class Lather implements JsonSerializable
      */
     public function call(...$params)
     {
-        foreach ($params as $param) {
-            foreach ($param as $pKey => $pValue) {
-                if (array_key_exists($pKey, $this->params)) {
-                    $preppedParam[$pKey] = $pValue;
+        if (!empty($params)) {
+            foreach ($params as $param) {
+                foreach ($param as $pKey => $pValue) {
+                    if (array_key_exists($pKey, $this->params)) {
+                        $preppedParam[$pKey] = $pValue;
+                    } else {
+                        throw new Exception("Param: {$pKey} does not exist");
+                    }
+                }
+            }
+        } else {
+            foreach ($this->params as $key => $param) {
+                if ($this->{$key}) {
+                    $preppedParam[$key] = $this->{$key};
                 } else {
-                    return new Exception("Param: {$pKey} does not exist");
+                    throw new Exception("Param: $param is missing");
                 }
             }
         }
@@ -218,6 +240,11 @@ class Lather implements JsonSerializable
     public function __get($name)
     {
         return $this->formattedResponse[$name];
+    }
+
+    public function __set($name, $value)
+    {
+        $this->{$name} = $value;
     }
 
     public function __call($name, $arguments)
