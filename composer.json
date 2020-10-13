@@ -1,5 +1,5 @@
 {
-    "name": "generalmoo/lather",
+    "name": "borkness/lather",
     "description": "Easy to use SOAP client",
     "type": "library",
     "require-dev": {
@@ -11,7 +11,7 @@
     "authors": [
         {
             "name": "Andrew Williams",
-            "email": "andrew@svr616.io"
+            "email": "aw@thebearded.dev"
         }
     ],
     "require": {},
